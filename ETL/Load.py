@@ -1,7 +1,7 @@
 import duckdb 
 import pandas as pd
-from scraper import scrapear
-
+from Extract import scrapear
+from Transform import clean_data
 
 def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
     """ Crea y llena la base de datos con los datos obtenidos del scraper
@@ -21,11 +21,14 @@ def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
 
         # Mostramos el tiempo que demoro en scrapear
         print(f"Tiempo transcurrido: {datos[0]:.2f} minutos")
-
-        df = pd.DataFrame(datos[1]) # Generamos el dataframe
-
+        
+        df = pd.DataFrame(datos[1])# Generamos el dataframe
+        
+        # Limpiamos los datos
+        clean_df = clean_data(df)
+        
         # Registramos el DataFrame en DuckDB
-        conn.register("df", df)
+        conn.register("df", clean_df)
 
         # Insertas el DataFrame como tabla (crea o reemplaza)
         conn.execute("CREATE TABLE IF NOT EXISTS propiedades AS SELECT * FROM df")
@@ -84,5 +87,5 @@ def create_csv(file_name: str ,connection: str = "Data/inmuebles.db") -> str:
     return {"Message": message}
 
 if __name__ == "__main__":
-    print(create_db())
-    print(create_csv("propiedades"))
+    #print(create_db())
+    print(create_csv("inmuebles"))

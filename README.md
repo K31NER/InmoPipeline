@@ -171,7 +171,6 @@ graph LR
 |------------|-----------|
 | ![Power BI](https://img.shields.io/badge/Power_BI-F2C811?style=flat&logo=powerbi&logoColor=black) | Business Intelligence |
 | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) | Interactive Dashboards |
-| ![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=flat&logo=plotly&logoColor=white) | Advanced Visualizations |
 
 ### 🤖 **Machine Learning & Deployment**
 | Tecnología | Propósito |
