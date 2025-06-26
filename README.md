@@ -96,24 +96,19 @@ graph TB
     B --> C
     C --> D
     C --> E
-    D --> F
+    E --> F
     F --> G
     G --> H
     H --> I
     H --> J
     H --> K
-    H --> L
+    D --> L
     L --> M
     M --> N
     N --> O
     O --> P
     P --> R
     J --> Q
-    
-    style A fill:#e1f5fe
-    style D fill:#f3e5f5
-    style P fill:#e8f5e8
-    style Q fill:#fff3e0
 ```
 
 ---
