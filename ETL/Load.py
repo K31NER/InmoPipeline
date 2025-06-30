@@ -1,9 +1,9 @@
 import duckdb 
 import pandas as pd
 from Extract import scrapear
-from Transform import clean_data
+from Transform import clean_data,add_regiones
 
-def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
+def create_db(n_paginas:int = 50, name:str = "Data/inmuebles_test.db"):
     """ Crea y llena la base de datos con los datos obtenidos del scraper
     
     Parametros:
@@ -26,12 +26,12 @@ def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
         
         # Limpiamos los datos
         clean_df = clean_data(df)
-        
+        region_df = add_regiones(clean_df)
         # Registramos el DataFrame en DuckDB
-        conn.register("df", clean_df)
+        conn.register("df", region_df)
 
         # Insertas el DataFrame como tabla (crea o reemplaza)
-        conn.execute("CREATE TABLE IF NOT EXISTS propiedades AS SELECT * FROM df")
+        conn.execute("CREATE OR REPLACE TABLE propiedades AS SELECT * FROM df")
 
         # Verificas que se guardó correctamente
         print(conn.execute("SELECT * FROM propiedades LIMIT 5").fetchdf())
@@ -87,5 +87,5 @@ def create_csv(file_name: str ,connection: str = "Data/inmuebles.db") -> str:
     return {"Message": message}
 
 if __name__ == "__main__":
-    #print(create_db())
-    print(create_csv("inmuebles"))
+    print(create_db())
+    #print(create_csv("propiedades_test"))
