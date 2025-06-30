@@ -3,7 +3,7 @@ import pandas as pd
 from Extract import scrapear
 from Transform import clean_data,add_regiones
 
-def create_db(n_paginas:int = 50, name:str = "Data/inmuebles_test.db"):
+def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
     """ Crea y llena la base de datos con los datos obtenidos del scraper
     
     Parametros:
@@ -88,4 +88,4 @@ def create_csv(file_name: str ,connection: str = "Data/inmuebles.db") -> str:
 
 if __name__ == "__main__":
     print(create_db())
-    #print(create_csv("propiedades_test"))
+    print(create_csv("propiedades"))
