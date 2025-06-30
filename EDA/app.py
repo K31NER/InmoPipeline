@@ -1,8 +1,8 @@
-import re
 import numpy as np
 import pandas as pd
 import streamlit as st 
 import plotly.express as px
+
 
 # Configuramos el dashboard
 st.set_page_config(
@@ -17,7 +17,7 @@ st.caption("Análisis exploratorio de precios y ubicación de propiedades en Col
 
 # Cargamos el dataframe
 df = pd.read_csv("../Data/propiedades.csv")
-df_ordenado = ["ciudades","precios","habitaciones","baños","metros_cuadrados","enlaces"]
+df_ordenado = ["ciudades","region","precios","habitaciones","baños","metros_cuadrados","enlaces"]
 
 
 # Definimos el sidebar
@@ -35,11 +35,11 @@ with st.sidebar:
     ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades)
     
     # Filtrar por regiones
-    lista_regiones = ['Caribe', 'Andina', 'Pacífica', 'Orinoquía', 'Amazónica']
+    lista_regiones = df["region"].sort_values().unique()
     regiones = st.multiselect("Selecione regiones",lista_regiones)
     
     # Check para filtrar terrenos sin habitaciones ni baños
-    filtro_terrenos = st.checkbox("Excluir terrenos",help="Elimina los inmuebles con habitaciones y baños con 0")
+    filtro_terrenos = st.checkbox("Excluir valores desconocidos",help="Elimina los valores desconocidos de cada columna")
     
     st.subheader("Fuentes de datos",divider="red")
     # Fuente de los datos con enlace real
@@ -54,8 +54,9 @@ with st.sidebar:
     
 
 if filtro_terrenos:
-    df = df[(df["habitaciones"]>0)& (df["baños"]>0) & (df["ciudades"] != "no especifica")]
+    df = df[(df["habitaciones"]>0)& (df["baños"]>0) & (df["ciudades"] != "no especifica") & (df["region"] != "desconocido")]
 
+# _____________________ Manejo de datos __________________________
 # Fila de la propiedad más cara y mas barata
 prop_mas_cara = df.loc[df["precios"].idxmax()]
 prop_men_cara = df.loc[df["precios"].idxmin()]
@@ -83,6 +84,12 @@ resumen_ciudades = df.groupby("ciudades").agg({
 }).reset_index()
 top_resumen_ciudades = resumen_ciudades.nlargest(10,"precios")
 
+# Agrupacion por regiones
+agrupacion_regiones = df.groupby("region")["precios"].mean().reset_index()
+num_propiedades_region = df.groupby("region").size().reset_index(name="propiedades")
+top_regiones_caras = agrupacion_regiones.nlargest(top,"precios")
+
+# _______________________ Metricas ___________________________________
 # Definimos las metricas importantes
 c1,c2,c3,c4 = st.columns(4)
 with c1:
@@ -99,13 +106,17 @@ with c3:
 with c4:
     st.metric("Total de propiedades", df.shape[0])
     
-    
+
+# _____________________ Visualizaciones __________________________________
 st.subheader("Tabla de datos",divider="red")
+
 # Mostramos el dataframe
 st.dataframe(df,use_container_width=True,column_order=df_ordenado,hide_index=True)
 
 # Mostramos las graficas
 st.subheader("Graficas",divider="red")
+
+# Top ciudades caras/baratas
 c1,c2 = st.columns(2)
 with c1: 
     bar_fig_horizon = px.bar(top_ciudades_caras, x="precios", y="ciudades", 
@@ -120,6 +131,7 @@ with c2:
     
     st.plotly_chart(bar_fig_horizon)
 
+# Habitaciones y correlacion2
 c1,c2 = st.columns(2)
 with c1:
     bar_fig = px.bar(top_hab,x="habitaciones",y="precios",text="precios",
@@ -137,9 +149,32 @@ with c2:
                     color_continuous_scale='Viridis',
                     title="Matriz de Correlación")
     st.plotly_chart(fig)
-    
-c1,c2 = st.columns(2)
 
+# Regiones 
+c1,c2 = st.columns(2)
+with c1: 
+    # Limitamos top a ≤ 7
+    if top > 7:
+        top = 6
+    bar_fig_horizon = px.bar(top_regiones_caras, x="precios", y="region", 
+                            orientation="h",text="precios",color="region",
+                            title=f"Top {top} regiones con mayor precio promedio")
+    
+    st.plotly_chart(bar_fig_horizon)
+with c2:
+    fig = px.pie(
+    num_propiedades_region,
+    values="propiedades",
+    names="region",
+    title="Distribución de propiedades por región",
+    hole=0.3 
+    )
+
+    fig.update_traces(textposition="inside", textinfo="percent+label")
+    st.plotly_chart(fig)
+
+# Distribucion 
+c1,c2 = st.columns(2)
 with c1:
     fig = px.area(top_metros.sort_values("metros_cuadrados"), x="metros_cuadrados", y="precios",
                 title=f"Top {top} Metros Cuadrados con Mayor Precio Promedio (Área)")
