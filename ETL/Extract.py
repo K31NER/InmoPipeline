@@ -35,7 +35,7 @@ def scrapear(N_pagina: int = 1) -> list:
 
             # Espera explícita hasta que aparezca al menos un contenedor de propiedad
             try:
-                page.wait_for_selector("div.listingCard", timeout=10000)  # Espera hasta 10 segundos
+                page.wait_for_selector("div.listingCard", timeout=60000)  # Espera hasta 10 segundos
             except:
                 print(f"No se encontraron propiedades en la página {pagina}")
                 continue
@@ -119,6 +119,7 @@ def scrapear(N_pagina: int = 1) -> list:
     return [final/60 , data]
     
 if __name__ == "__main__":
-    resultado = scrapear(50)
-    print(f"tiempo{resultado[0]}")
-    print(f" Data: {resultado[1]}")
+    resultado = scrapear(24)
+    #print(f"tiempo{resultado[0]}")
+    #print(f" Data: {resultado[1]}")
+   
