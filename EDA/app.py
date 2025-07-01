@@ -29,14 +29,19 @@ with st.sidebar:
     top = int(st.number_input(label="Digite el numero de top a mostrar",
                         value=5, min_value=3, max_value=10, step=1, format="%d", icon="🏆",help="Limita el numero de resultados mayores"))
     
-
-    # Filtrar por ciudades
-    lista_ciudades = df["ciudades"].sort_values().unique()
-    ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades)
-    
     # Filtrar por regiones
     lista_regiones = df["region"].sort_values().unique()
     regiones = st.multiselect("Selecione regiones",lista_regiones)
+        
+    # Filtramos el dataframe solo para definir las ciudades disponibles
+    if regiones:
+        df_ciudades_disponibles = df[df["region"].isin(regiones)]
+    else:
+        df_ciudades_disponibles = df
+        
+    # Filtrar por ciudades
+    lista_ciudades = df_ciudades_disponibles["ciudades"].sort_values().unique()
+    ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades)
     
     # Check para filtrar terrenos sin habitaciones ni baños
     filtro_terrenos = st.checkbox("Excluir valores desconocidos",help="Elimina los valores desconocidos de cada columna")
@@ -52,9 +57,52 @@ with st.sidebar:
         unsafe_allow_html=True
     )
     
+# ____________________ Filtrado __________________________________________
+
+if regiones:
+    df = df[df["region"].isin(regiones)]
+
+if ciudades:
+    df = df[df["ciudades"].isin(ciudades)]
 
 if filtro_terrenos:
     df = df[(df["habitaciones"]>0)& (df["baños"]>0) & (df["ciudades"] != "no especifica") & (df["region"] != "desconocido")]
+
+# Reset index después de todos los filtros
+df = df.reset_index(drop=True)
+if df.empty:
+    st.badge("Sin resultados para los filtros seleccionados", icon=":material/warning:",color="red")
+    st.error("⚠️ No hay datos disponibles con los filtros seleccionados. Por favor, ajuste los filtros.")
+    st.stop()  # Detiene la ejecución del resto del código
+
+# ___________________________ badge de estado de filtros ________________________
+# Mostramos datos de filtro
+c1,c2,c3,c4 = st.columns(4)
+with c1: 
+    if regiones:
+        st.badge(f"Regiones filtradas: {len(regiones)}", icon=":material/map:", color="orange")
+    else:
+        st.badge(f"Regiones totales: {len(df['region'].unique())}", icon=":material/map:", color="green")
+        
+with c2:
+    if ciudades:
+        st.badge(f"Ciudades filtradas: {len(ciudades)}", icon=":material/location_city:", color="orange") 
+    else:
+        st.badge(f"Ciudades: {len(df['ciudades'].unique())}", icon=":material/location_city:", color="green") 
+with c3:
+    if filtro_terrenos:
+        st.badge(f"Se excluyeron valores", icon=":material/disabled_visible:", color="orange") 
+    else:
+        st.badge(f"Todos los valores disponibles", icon=":material/in_home_mode:", color="green") 
+with c4:
+    if regiones and ciudades:
+        st.badge("Análisis enfocado por región y ciudad", icon=":material/search_insights:", color="orange")
+    elif regiones:
+        st.badge(f"Análisis enfocado por región: {len(regiones)}", icon=":material/search_insights:", color="orange")
+    elif ciudades:
+        st.badge(f"Análisis enfocado por ciudad: {len(ciudades)}", icon=":material/search_insights:", color="orange")
+    else:
+        st.badge("Análisis general - Todo el país", icon=":material/search_insights:", color="green")
 
 # _____________________ Manejo de datos __________________________
 # Fila de la propiedad más cara y mas barata
@@ -153,8 +201,10 @@ with c2:
 # Regiones 
 c1,c2 = st.columns(2)
 with c1: 
-    # Limitamos top a ≤ 7
-    if top > 7:
+    # Limitamos top a > 6
+    if top > 5 and filtro_terrenos:
+        top = 5
+    elif top > 6:
         top = 6
     bar_fig_horizon = px.bar(top_regiones_caras, x="precios", y="region", 
                             orientation="h",text="precios",color="region",
