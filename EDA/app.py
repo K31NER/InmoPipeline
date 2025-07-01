@@ -3,7 +3,6 @@ import pandas as pd
 import streamlit as st 
 import plotly.express as px
 
-
 # Configuramos el dashboard
 st.set_page_config(
     page_icon="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-6F0Oea8suMLdEi6BoluXYbqXxnWEdt.png&w=1920&q=75",
@@ -19,8 +18,14 @@ st.caption("Análisis exploratorio de precios y ubicación de propiedades en Col
 df = pd.read_csv("../Data/propiedades.csv")
 df_ordenado = ["ciudades","region","precios","habitaciones","baños","metros_cuadrados","enlaces"]
 
-
-# Definimos el sidebar
+# definimos una funcion modal
+@st.dialog("Resumen estadistico",width="large")
+def describe_data(df):
+    st.subheader("Descripcion estadistica de los datos",divider="red")
+    st.dataframe(df.describe())
+    st.caption(":blue[Resumen estaditicos de los datos]")
+    
+# Definimos el primer sidebar para filtrar
 with st.sidebar:
     st.image("https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-YxKlwIcjJqTAeRHzfEN0Qra6tvwzNQ.png&w=1920&q=75")
     st.subheader("Configuraciones",divider="red")
@@ -42,23 +47,11 @@ with st.sidebar:
     # Filtrar por ciudades
     lista_ciudades = df_ciudades_disponibles["ciudades"].sort_values().unique()
     ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades)
-    
+        
     # Check para filtrar terrenos sin habitaciones ni baños
     filtro_terrenos = st.checkbox("Excluir valores desconocidos",help="Elimina los valores desconocidos de cada columna")
-    
-    st.subheader("Fuentes de datos",divider="red")
-    # Fuente de los datos con enlace real
-    st.markdown(
-        '[Datos - Fincaraiz](https://www.fincaraiz.com.co)',
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        '[API Colombia - Regiones](https://api-colombia.com)',
-        unsafe_allow_html=True
-    )
-    
-# ____________________ Filtrado __________________________________________
 
+# ____________________ Filtrado __________________________________________
 if regiones:
     df = df[df["region"].isin(regiones)]
 
@@ -74,7 +67,23 @@ if df.empty:
     st.badge("Sin resultados para los filtros seleccionados", icon=":material/warning:",color="red")
     st.error("⚠️ No hay datos disponibles con los filtros seleccionados. Por favor, ajuste los filtros.")
     st.stop()  # Detiene la ejecución del resto del código
-
+    
+# Volvemos a llamar al sidebar post modificaciones
+with st.sidebar:
+    if st.button("Resumen",icon=":material/description:",use_container_width=True):
+        describe_data(df)
+        
+    st.subheader("Fuentes de datos",divider="red")
+    # Fuente de los datos con enlace real
+    st.markdown(
+        '[Datos - Fincaraiz](https://www.fincaraiz.com.co)',
+        unsafe_allow_html=True
+    )
+    st.markdown(
+        '[API Colombia - Regiones](https://api-colombia.com)',
+        unsafe_allow_html=True
+    )
+    
 # ___________________________ badge de estado de filtros ________________________
 # Mostramos datos de filtro
 c1,c2,c3,c4 = st.columns(4)
