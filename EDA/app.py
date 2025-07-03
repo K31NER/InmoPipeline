@@ -11,12 +11,29 @@ st.set_page_config(
 )
 
 # Definimos el titulo del dashboard
-st.title("🏡 FincaRaiz - Exploración del Mercado de Bienes Raíces en Colombia")
+st.header("🏡 FincaRaiz - Exploración del Mercado de Bienes Raíces en Colombia",width="content")
 st.caption("Análisis exploratorio de precios y ubicación de propiedades en Colombia")
 
 # Cargamos el dataframe
 df = pd.read_csv("../Data/propiedades.csv")
 df_ordenado = ["ciudades","region","precios","habitaciones","baños","metros_cuadrados","enlaces"]
+
+# Personalizamos el estilo de los datos que se mostraran
+df_column_style = {
+            "enlaces":st.column_config.LinkColumn("Enlaces",help="Enlaces de cada inmueble"),
+            
+            "ciudades":st.column_config.TextColumn("Ciudades",help="Ciudad donde esta el inmueble"),
+            
+            "region":st.column_config.ListColumn("Regiones",help="Region de cada ciudad"),
+            
+            "precios":st.column_config.NumberColumn("Precios",format="compact",width="small",help="Valor del inmueble"),
+            
+            "habitaciones":st.column_config.NumberColumn("Habitaciones",format=f"%d 🏠",width="small",help="Numero de habitaciones en el inmueble"),
+            
+            "baños":st.column_config.NumberColumn("Baños",format="%d 🚽",width="small",help="Numero de baños en el inmueble"),
+            
+            "metros_cuadrados":st.column_config.NumberColumn("M²",width="small",format="%d M²",help="Metros cuadrados del inmueble")
+            }
 
 # definimos una funcion modal
 @st.dialog("Resumen estadistico",width="large")
@@ -32,7 +49,7 @@ with st.sidebar:
     
     # Filtramos por top interactivo
     top = int(st.number_input(label="Digite el numero de top a mostrar",
-                        value=5, min_value=3, max_value=10, step=1, format="%d", icon="🏆",help="Limita el numero de resultados mayores"))
+                        value=5, min_value=3, max_value=10, step=1, format="%d", icon=":material/swap_vert:",help="Limita el numero de resultados mayores"))
     
     # Filtrar por regiones
     lista_regiones = df["region"].sort_values().unique()
@@ -49,17 +66,28 @@ with st.sidebar:
     ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades)
         
     # Check para filtrar terrenos sin habitaciones ni baños
-    filtro_terrenos = st.checkbox("Excluir valores desconocidos",help="Elimina los valores desconocidos de cada columna")
+    filtro_terrenos = st.toggle("Excluir valores desconocidos",help="Elimina los valores desconocidos de cada columna")
 
-# ____________________ Filtrado __________________________________________
+# ______________________ Filtros __________________________________________
+if filtro_terrenos:
+    # Limpiamos los valores nulos
+    df = df[
+        (df["habitaciones"]>0) & 
+        (df["baños"]>0) & 
+        (df["ciudades"] != "no especifica") &
+        (df["region"] != "desconocido")
+        ]
+    
+    st.toast("Se eliminaron los datos con valores incompletos",icon=":material/delete:")
+    
 if regiones:
     df = df[df["region"].isin(regiones)]
+    regiones_texto = ", ".join(regiones)
+    st.toast(f"Regiones :green[{str(regiones_texto)}] selecionadas de manera correcta",icon=":material/map:")
 
 if ciudades:
     df = df[df["ciudades"].isin(ciudades)]
-
-if filtro_terrenos:
-    df = df[(df["habitaciones"]>0)& (df["baños"]>0) & (df["ciudades"] != "no especifica") & (df["region"] != "desconocido")]
+    st.toast(f":green[{len(ciudades)}] Ciudades selecionadas con exito",icon=":material/location_city:")
 
 # Reset index después de todos los filtros
 df = df.reset_index(drop=True)
@@ -68,21 +96,19 @@ if df.empty:
     st.error("⚠️ No hay datos disponibles con los filtros seleccionados. Por favor, ajuste los filtros.")
     st.stop()  # Detiene la ejecución del resto del código
     
+# ___________________________ Continuacion de sidebar ___________________________-
 # Volvemos a llamar al sidebar post modificaciones
 with st.sidebar:
     if st.button("Resumen",icon=":material/description:",use_container_width=True):
         describe_data(df)
+        st.toast(":green[Resumen generado]",icon=":material/description:")
         
     st.subheader("Fuentes de datos",divider="red")
+    
     # Fuente de los datos con enlace real
-    st.markdown(
-        '[Datos - Fincaraiz](https://www.fincaraiz.com.co)',
-        unsafe_allow_html=True
-    )
-    st.markdown(
-        '[API Colombia - Regiones](https://api-colombia.com)',
-        unsafe_allow_html=True
-    )
+    st.link_button("Datos - FincaRaiz","https://www.fincaraiz.com.co",icon=":material/dataset_linked:",use_container_width=True)
+    
+    st.link_button("API Colombia - Regiones","https://api-colombia.com",use_container_width=True,icon=":material/api:")
     
 # ___________________________ badge de estado de filtros ________________________
 # Mostramos datos de filtro
@@ -149,26 +175,23 @@ top_regiones_caras = agrupacion_regiones.nlargest(top,"precios")
 # _______________________ Metricas ___________________________________
 # Definimos las metricas importantes
 c1,c2,c3,c4 = st.columns(4)
-with c1:
-    st.metric(label=f"Mayor precio - {prop_mas_cara['ciudades']}", 
-            value=f"${prop_mas_cara['precios']:,.0f}")
+c1.metric(label=f"Mayor precio - {prop_mas_cara['ciudades']}", 
+            value=f"${prop_mas_cara['precios']:,.0f}",border=True)
 
-with c2:
-    st.metric(label=f"Menor precio - {prop_men_cara['ciudades']}", 
-            value=f"${prop_men_cara['precios']:,.0f}")
+c2.metric(label=f"Menor precio - {prop_men_cara['ciudades']}", 
+            value=f"${prop_men_cara['precios']:,.0f}",border=True)
 
-with c3:
-    st.metric("Precio promedio", f"${df['precios'].mean():,.0f}")
+c3.metric("Precio promedio", f"${df['precios'].mean():,.0f}",border=True)
 
-with c4:
-    st.metric("Total de propiedades", df.shape[0])
-    
+c4.metric("Total de propiedades", df.shape[0],border=True)
 
 # _____________________ Visualizaciones __________________________________
 st.subheader("Tabla de datos",divider="red")
 
 # Mostramos el dataframe
-st.dataframe(df,use_container_width=True,column_order=df_ordenado,hide_index=True)
+st.dataframe(df,use_container_width=True,
+            column_order=df_ordenado,hide_index=True,
+            column_config=df_column_style)
 
 # Mostramos las graficas
 st.subheader("Graficas",divider="red")
