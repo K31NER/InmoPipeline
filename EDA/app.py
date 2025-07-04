@@ -5,7 +5,7 @@ import plotly.express as px
 
 # Configuramos el dashboard
 st.set_page_config(
-    page_icon="https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-6F0Oea8suMLdEi6BoluXYbqXxnWEdt.png&w=1920&q=75",
+    page_icon="../img/logo.png",
     page_title="InmoPipeline",
     layout="wide"
 )
@@ -38,14 +38,15 @@ df_column_style = {
 # definimos una funcion modal
 @st.dialog("Resumen estadistico",width="large")
 def describe_data(df):
-    st.subheader("Descripcion estadistica de los datos",divider="red")
+    st.subheader("Descripcion estadistica de los datos",divider="orange")
     st.dataframe(df.describe())
     st.caption(":blue[Resumen estaditicos de los datos]")
     
 # Definimos el primer sidebar para filtrar
 with st.sidebar:
-    st.image("https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-YxKlwIcjJqTAeRHzfEN0Qra6tvwzNQ.png&w=1920&q=75")
-    st.subheader("Configuraciones",divider="red")
+    st.logo("https://cdn-icons-png.flaticon.com/128/14648/14648421.png",size="large")
+    st.image("../img/logo.png",)
+    st.subheader("Configuraciones",divider="orange")
     
     # Filtramos por top interactivo
     top = int(st.number_input(label="Digite el numero de top a mostrar",
@@ -103,7 +104,7 @@ with st.sidebar:
         describe_data(df)
         st.toast(":green[Resumen generado]",icon=":material/description:")
         
-    st.subheader("Fuentes de datos",divider="red")
+    st.subheader("Fuentes de datos",divider="orange")
     
     # Fuente de los datos con enlace real
     st.link_button("Datos - FincaRaiz","https://www.fincaraiz.com.co",icon=":material/dataset_linked:",use_container_width=True)
@@ -186,7 +187,7 @@ c3.metric("Precio promedio", f"${df['precios'].mean():,.0f}",border=True)
 c4.metric("Total de propiedades", df.shape[0],border=True)
 
 # _____________________ Visualizaciones __________________________________
-st.subheader("Tabla de datos",divider="red")
+st.subheader("Tabla de datos",divider="orange")
 
 # Mostramos el dataframe
 st.dataframe(df,use_container_width=True,
@@ -194,7 +195,7 @@ st.dataframe(df,use_container_width=True,
             column_config=df_column_style)
 
 # Mostramos las graficas
-st.subheader("Graficas",divider="red")
+st.subheader("Graficas",divider="orange")
 
 # Top ciudades caras/baratas
 c1,c2 = st.columns(2)
@@ -226,23 +227,25 @@ with c2:
     # Heatmap con Plotly
     fig = px.imshow(df_corr,
                     text_auto=True,
-                    color_continuous_scale='Viridis',
+                    color_continuous_scale='Ice',
                     title="Matriz de Correlación")
     st.plotly_chart(fig)
 
 # Regiones 
 c1,c2 = st.columns(2)
 with c1: 
+    top_r = top
     # Limitamos top a > 6
     if top > 5 and filtro_terrenos:
-        top = 5
+        top_r = 5
     elif top > 6:
-        top = 6
+        top_r = 6
     bar_fig_horizon = px.bar(top_regiones_caras, x="precios", y="region", 
                             orientation="h",text="precios",color="region",
-                            title=f"Top {top} regiones con mayor precio promedio")
+                            title=f"Top {top_r} regiones con mayor precio promedio")
     
     st.plotly_chart(bar_fig_horizon)
+    
 with c2:
     fig = px.pie(
     num_propiedades_region,
