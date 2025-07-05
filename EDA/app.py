@@ -1,3 +1,4 @@
+import httpx
 import numpy as np
 import pandas as pd
 import streamlit as st 
@@ -10,12 +11,20 @@ st.set_page_config(
     layout="wide"
 )
 
+# Definimos la url donde esta nuestro modelo
+URL_MODEL = "http://127.0.0.1:8000/model"
+
 # Definimos el titulo del dashboard
 st.header("🏡 FincaRaiz - Exploración del Mercado de Bienes Raíces en Colombia",width="content")
 st.caption("Análisis exploratorio de precios y ubicación de propiedades en Colombia")
 
 # Cargamos el dataframe
-df = pd.read_csv("../Data/propiedades.csv")
+@st.cache_data() # Guardamos en cache los datos
+def get_data():
+    df = pd.read_csv("../Data/propiedades.csv")
+    return df
+
+df = get_data()
 df_ordenado = ["ciudades","region","precios","habitaciones","baños","metros_cuadrados","enlaces"]
 
 # Personalizamos el estilo de los datos que se mostraran
@@ -35,6 +44,7 @@ df_column_style = {
             "metros_cuadrados":st.column_config.NumberColumn("M²",width="small",format="%d M²",help="Metros cuadrados del inmueble")
             }
 
+# _______________________ Modales ______________________________________________
 # definimos una funcion modal
 @st.dialog("Resumen estadistico",width="large")
 def describe_data(df):
@@ -42,10 +52,65 @@ def describe_data(df):
     st.dataframe(df.describe())
     st.caption(":blue[Resumen estaditicos de los datos]")
     
+@st.dialog("Predecir precio",width="large")
+def predict_price(df):
+    """ Realiza una solcitud post a la API que tiene el modelo y devuelve la respuesta"""
+    # Definimos la lista de regiones que espera la API
+    list_regiones = ["Caribe","Amazonia","Pacífico","Orinoquía","Andina","Insular"]
+    
+    # Creamos el formulario
+    with st.form("Formulario para predecir precio"):
+        
+        metros_2 = st.number_input("Metros cuadrados",min_value=1,icon=":material/metro:",help="Indique el numero de metros cuadros que desea analizar")
+        
+        habs = st.number_input("Numero de habitaciones",min_value=1,icon=":material/sensor_door:",help="Indica el numero de habitaciones que quiere")
+        
+        baños = st.number_input("Numero de baños",min_value=1,icon=":material/bathroom:",help="Indica el numero de baños que quiere")
+        
+        region = st.selectbox("Region",options=list_regiones,help="Indique en que region quiere analizar el inmueble")
+        
+        # Definimos el boton de enviar
+        enviar = st.form_submit_button("Enviar",icon=":material/send:",type="primary")
+        
+        if enviar:
+            # Recopilamos los datos
+            data = {
+                "habs":int(habs),
+                "baños": int(baños),
+                "m2": int(metros_2),
+                "region": str(region)
+            }
+            
+            # Creamos un spinner para esperar a que la API responda
+            with st.spinner("Enviando datos y esperando respuesta de la API...",show_time=True):
+                # Enviamos los datos y obtenemos la respuesta
+                try:
+                    # Enviamos los datos
+                    response = httpx.post(URL_MODEL,json=data)
+                    
+                    # Validamos la respuesta del servidor
+                    if response.status_code == 200:
+                        json_response = response.json() # Obtenemos el body
+                        
+                        # Seperamos la respuesta
+                        prediccion = json_response.get("Prediccion")
+                        detalles = json_response.get("Datos Recibidos")
+                        
+                        # Mostramos la respuesta
+                        st.success(f"Prediccion: {prediccion}",icon=":material/check_circle:")
+                        
+                        # Mostramos los detalles
+                        with st.expander("Ver detalles",icon=":material/content_paste_search:"):
+                            st.json(detalles,expanded=True)
+                        
+                except Exception as e:
+                    st.error(f"Error al enviar datos: {e}")
+    
+# _________________ Primera configuracion del sidebar __________________________
 # Definimos el primer sidebar para filtrar
 with st.sidebar:
     st.logo("https://cdn-icons-png.flaticon.com/128/14648/14648421.png",size="large")
-    st.image("../img/logo.png",)
+    st.image("../img/logo.png")
     st.subheader("Configuraciones",divider="orange")
     
     # Filtramos por top interactivo
@@ -97,19 +162,27 @@ if df.empty:
     st.error("⚠️ No hay datos disponibles con los filtros seleccionados. Por favor, ajuste los filtros.")
     st.stop()  # Detiene la ejecución del resto del código
     
+    
 # ___________________________ Continuacion de sidebar ___________________________-
 # Volvemos a llamar al sidebar post modificaciones
 with st.sidebar:
-    if st.button("Resumen",icon=":material/description:",use_container_width=True):
+    st.subheader("Funciones extra",divider="orange")
+    
+    if st.button("Predecir",icon=":material/model_training:",use_container_width=True,help="Realiza predicciones del precio del inmueble en base a sus parametros"):
+        predict_price(df)
+        st.toast(":green[Entro en modo de prediccion]",icon=":material/check:")
+        
+    if st.button("Resumen",icon=":material/description:",use_container_width=True,help="Obtenga un resumen estadictico general de los datos"):
         describe_data(df)
         st.toast(":green[Resumen generado]",icon=":material/description:")
         
     st.subheader("Fuentes de datos",divider="orange")
     
     # Fuente de los datos con enlace real
-    st.link_button("Datos - FincaRaiz","https://www.fincaraiz.com.co",icon=":material/dataset_linked:",use_container_width=True)
+    st.link_button("Datos - FincaRaiz","https://www.fincaraiz.com.co",icon=":material/dataset_linked:",use_container_width=True,type="primary")
     
-    st.link_button("API Colombia - Regiones","https://api-colombia.com",use_container_width=True,icon=":material/api:")
+    st.link_button("API Colombia - Regiones","https://api-colombia.com",use_container_width=True,icon=":material/api:",type="primary")
+    
     
 # ___________________________ badge de estado de filtros ________________________
 # Mostramos datos de filtro

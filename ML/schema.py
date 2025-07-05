@@ -10,7 +10,7 @@ class Regiones(str,Enum):
     insular = "Insular"
     
 
-class Testinput(BaseModel):
+class Datainput(BaseModel):
     habs: int
     baños: int
     m2: int
