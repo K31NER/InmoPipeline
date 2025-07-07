@@ -1,7 +1,7 @@
 import joblib 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score,mean_squared_error
 from sklearn.model_selection import cross_val_score, train_test_split,KFold
 
@@ -103,11 +103,15 @@ def feature_importance_df(X, importancias):
     }).sort_values(by="Importancia", ascending=False)
 
 # ___________ Guardamos el modelo __________________________--
-def save_model(model, feature_columns, region_cost, path):
+def save_model(model, feature_columns, region_cost,r2,mse, path):
     modelo_info = {
         "model": model,
         "feature_columns": feature_columns,
-        "region_cost": region_cost
+        "region_cost": region_cost,
+        "R2": f"{r2:,.4f}",
+        "MSE": f"{mse:,.4f}",
+        "Datos": len(df),
+        "nota":"Modelo ajustado con Random Forest para predicción de precios inmobiliarios."
     }
     joblib.dump(modelo_info, path)
     print(f"\n✅ Modelo guardado en {path} con features: {feature_columns}")
@@ -129,7 +133,9 @@ if __name__ == "__main__":
     importancia_df = feature_importance_df(X_train, importancias)
     print("\n🔥 Importancia de características:")
     print(importancia_df)
+    save_model(model, X_train.columns.tolist(), region_cost, r2,mse,"model.pkl")
     
+    """ 
     print("\n ________________Test validacion cruzada__________________ \n")
     
     model_cross = RandomForestRegressor(
@@ -144,3 +150,4 @@ if __name__ == "__main__":
     test_cross_validation(df,model_cross)
     
     #save_model(model, X_train.columns.tolist(), region_cost, "test_model.pkl")
+    """

@@ -99,7 +99,7 @@ def predict_price(df):
                         
                         # Seperamos la respuesta
                         prediccion = json_response.get("Prediccion")
-                        detalles = json_response.get("Datos Recibidos")
+                        detalles = json_response.get("Details")
                         
                         # Mostramos la respuesta
                         st.success(f"Prediccion: {prediccion}",icon=add_icon("check_circle"))
