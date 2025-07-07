@@ -20,8 +20,7 @@ def load_model(model_path=MODEL_PATH):
     
     Retorna:
     - model : modelo 
-    - feature_columns: orden de las columnas
-    - region_cost: coste de vida de cada region
+    - model_data : datos relevantes del modelo
     
     """
     
@@ -31,13 +30,18 @@ def load_model(model_path=MODEL_PATH):
         
         # Obtenemos el modelo
         model = modelo_info['model']
-        #feature_columns = modelo_info['feature_columns']
-        #region_cost = modelo_info['region_cost']
+        
         model_data = {
-            "R²": modelo_info["R2"],
-            "MSE": modelo_info["MSE"],
-            "Datos": modelo_info["Datos"],
-            "Nota": modelo_info["nota"]
+            "Version": "1.0",
+            "Fecha de entrenamiento": "05/07/25",
+            "R² (Entrenamiento)": modelo_info["R2"],
+            "MSE (Entrenamiento)": modelo_info["MSE"],
+            "Datos de entrenamiento": modelo_info["Datos"],
+            "Error absoluto(Prueba externa)": "19.44% con 282 datos nuevos" ,
+            "Features":modelo_info["feature_columns"],
+            "Fuente de los datos": "Web scrapyn - fincaraiz | API Colombia - regiones",
+            "Nota": {"Tipo de modelo" : modelo_info["nota"],
+                    "Limitaciones": "No considera ubicación geográfica exacta ni estrato",},
         }
         return model ,model_data
     

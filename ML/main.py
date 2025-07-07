@@ -37,7 +37,8 @@ def start_event():
 # Endpoint de incio
 @app.get("/")
 async def index():
-    return {"Message": "✅ Servidor iniciado con éxito - InmoPipeline API"}
+    return JSONResponse(content={"Message": "✅ Servidor iniciado con éxito - InmoPipeline API",
+    "info": model_data},status_code=200)
     
 # Endpoint para cargar el modelo
 @app.post("/model")

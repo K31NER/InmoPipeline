@@ -10,7 +10,6 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Power_BI-Business_Intelligence-F2C811?style=for-the-badge&logo=powerbi&logoColor=black" alt="Power BI">
   <img src="https://img.shields.io/badge/Streamlit-Interactive_Dashboards-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit">
   <img src="https://img.shields.io/badge/Scikit_Learn-Machine_Learning-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="Scikit-Learn">
   <img src="https://img.shields.io/badge/FastAPI-ML_Services-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
@@ -169,7 +168,6 @@ graph LR
 ### 📊 **Analytics & Visualization**
 | Tecnología | Propósito |
 |------------|-----------|
-| ![Power BI](https://img.shields.io/badge/Power_BI-F2C811?style=flat&logo=powerbi&logoColor=black) | Business Intelligence |
 | ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white) | Interactive Dashboards |
 
 ### 🤖 **Machine Learning & Deployment**

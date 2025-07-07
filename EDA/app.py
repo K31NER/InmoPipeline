@@ -1,6 +1,6 @@
-import httpx
 import numpy as np
 import pandas as pd
+from utils import *
 import streamlit as st 
 import plotly.express as px
 
@@ -49,68 +49,6 @@ df_column_style = {
             "metros_cuadrados":st.column_config.NumberColumn("M²",width="small",format="%d M²",help="Metros cuadrados del inmueble")
             }
 
-# _______________________ Modales ______________________________________________
-# definimos una funcion modal
-@st.dialog("Resumen estadistico",width="large")
-def describe_data(df):
-    st.subheader("Descripcion estadistica de los datos",divider="orange")
-    st.dataframe(df.describe())
-    st.caption(":blue[Resumen estaditicos de los datos]")
-    
-@st.dialog("Predecir precio",width="large")
-def predict_price(df):
-    """ Realiza una solcitud post a la API que tiene el modelo y devuelve la respuesta"""
-    # Definimos la lista de regiones que espera la API
-    list_regiones = ["Caribe","Amazonia","Pacífico","Orinoquía","Andina","Insular"]
-    
-    # Creamos el formulario
-    with st.form("Formulario para predecir precio"):
-        
-        metros_2 = st.number_input("Metros cuadrados",min_value=10.0,icon=add_icon("metro"),help="Indique el numero de metros cuadros que desea analizar",value=100.0,step=0.1)
-        
-        habs = st.number_input("Numero de habitaciones",min_value=1,icon=add_icon("sensor_door"),help="Indica el numero de habitaciones que quiere")
-        
-        baños = st.number_input("Numero de baños",min_value=1,icon=add_icon("bathroom"),help="Indica el numero de baños que quiere")
-        
-        region = st.selectbox("Region",options=list_regiones,help="Indique en que region quiere analizar el inmueble")
-        
-        # Definimos el boton de enviar
-        enviar = st.form_submit_button("Enviar",icon=add_icon("send"),type="primary")
-        
-        if enviar:
-            # Recopilamos los datos
-            data = {
-                "habs":int(habs),
-                "baños": int(baños),
-                "m2": float(metros_2),
-                "region": str(region)
-            }
-            
-            # Creamos un spinner para esperar a que la API responda
-            with st.spinner("Enviando datos y esperando respuesta de la API...",show_time=True):
-                # Enviamos los datos y obtenemos la respuesta
-                try:
-                    # Enviamos los datos
-                    response = httpx.post(URL_MODEL,json=data)
-                    
-                    # Validamos la respuesta del servidor
-                    if response.status_code == 200:
-                        json_response = response.json() # Obtenemos el body
-                        
-                        # Seperamos la respuesta
-                        prediccion = json_response.get("Prediccion")
-                        detalles = json_response.get("Details")
-                        
-                        # Mostramos la respuesta
-                        st.success(f"Prediccion: {prediccion}",icon=add_icon("check_circle"))
-                        
-                        # Mostramos los detalles
-                        with st.expander("Ver detalles",icon=add_icon("content_paste_search")):
-                            st.json(detalles,expanded=True)
-                        
-                except Exception as e:
-                    st.error(f"Error al enviar datos: {e}")
-    
 # _________________ Primera configuracion del sidebar __________________________
 # Definimos el primer sidebar para filtrar
 with st.sidebar:
@@ -124,7 +62,7 @@ with st.sidebar:
     
     # Filtrar por regiones
     lista_regiones = df["region"].sort_values().unique()
-    regiones = st.multiselect("Selecione regiones",lista_regiones)
+    regiones = st.multiselect("Selecione regiones",lista_regiones,placeholder="Seleccione una mas regiones")
         
     # Filtramos el dataframe solo para definir las ciudades disponibles
     if regiones:
@@ -134,10 +72,15 @@ with st.sidebar:
         
     # Filtrar por ciudades
     lista_ciudades = df_ciudades_disponibles["ciudades"].sort_values().unique()
-    ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades)
+    ciudades: list = st.multiselect("Selecionar ciudades",lista_ciudades,placeholder="Seleccione una o mas ciudades")
         
+    # Definimos el tipo de correlacion para el mapa de calor
+    correlaciones = ['spearman','pearson', 'kendall']
+    metodo_corr = st.selectbox("Metoodo de correlacion",correlaciones,help="Seleccione el metodo de correlacion que se aplicara el mapa de calor")
+    
     # Check para filtrar terrenos sin habitaciones ni baños
     filtro_terrenos = st.toggle("Excluir valores desconocidos",help="Elimina los valores desconocidos de cada columna")
+    
 
 # ______________________ Filtros __________________________________________
 if filtro_terrenos:
@@ -301,12 +244,12 @@ with c1:
     
 with c2:
     variables = ["precios","metros_cuadrados","habitaciones","baños"]
-    df_corr = df[variables].corr()
+    df_corr = df[variables].corr(method=metodo_corr)
     # Heatmap con Plotly
     fig = px.imshow(df_corr,
                     text_auto=True,
                     color_continuous_scale='Ice',
-                    title="Matriz de Correlación")
+                    title=f"Matriz de Correlación - {metodo_corr.title()}")
     st.plotly_chart(fig)
 
 # Regiones 
@@ -348,3 +291,4 @@ with c2:
                 title="Distribucion de precios de las propiedades",color_discrete_sequence=["#F54B1C"])
     st.plotly_chart(hist_fig)
     
+
