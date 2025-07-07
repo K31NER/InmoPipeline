@@ -13,5 +13,5 @@ class Regiones(str,Enum):
 class Datainput(BaseModel):
     habs: int
     baños: int
-    m2: int
+    m2: float
     region: Regiones
