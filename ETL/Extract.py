@@ -9,7 +9,7 @@ URL: str = "https://www.fincaraiz.com.co/venta/pagina"
 titulos,enlaces,precios,habitaciones_list,baños_list,metros_list = [],[],[],[],[],[]
 
 
-def scrapear(N_pagina: int = 1) -> list:
+def scrapear(url_base:str = URL,N_pagina: int = 1) -> list:
     """ Scrapea los datos de fincaraiz de x nuemero de paginas
     
     Parametros: 
@@ -30,7 +30,7 @@ def scrapear(N_pagina: int = 1) -> list:
 
         # recorremos cada pagina
         for pagina in range(1, N_pagina + 1):
-            new_url = f"{URL}{pagina}"  # Modificamos la url
+            new_url = f"{url_base}{pagina}"  # Modificamos la url
             page.goto(new_url)
 
             # Espera explícita hasta que aparezca al menos un contenedor de propiedad
@@ -120,6 +120,7 @@ def scrapear(N_pagina: int = 1) -> list:
     
 if __name__ == "__main__":
     resultado = scrapear(24)
+    #df = pd.DataFrame(resultado[1])
     #print(f"tiempo{resultado[0]}")
     #print(f" Data: {resultado[1]}")
    

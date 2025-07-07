@@ -3,6 +3,9 @@ import pandas as pd
 from Extract import scrapear
 from Transform import *
 
+# Definimos la url base
+URL: str = "https://www.fincaraiz.com.co/venta/pagina"
+
 def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
     """ Crea y llena la base de datos con los datos obtenidos del scraper
     
@@ -17,7 +20,7 @@ def create_db(n_paginas:int = 50, name:str = "Data/inmuebles.db"):
         conn = duckdb.connect(name)
 
         # Obtenemos los datos
-        datos = scrapear(n_paginas)
+        datos = scrapear(URL,n_paginas)
 
         # Mostramos el tiempo que demoro en scrapear
         print(f"Tiempo transcurrido: {datos[0]:.2f} minutos")
@@ -88,5 +91,6 @@ def create_csv(file_name: str ,connection: str = "Data/inmuebles.db") -> str:
     return {"Message": message}
 
 if __name__ == "__main__":
-    print(create_db())
-    print(create_csv())
+    #print(create_db())
+    #print(create_csv())
+    pass
