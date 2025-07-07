@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
 from schema import Datainput
-from fastapi.responses import JSONResponse
 from utils import get_predict,load_model
+from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -12,7 +12,7 @@ app = FastAPI(
 
 # Definimos las urls que tendran acceso a la api
 origins = [
-    "http://localhost:8501"
+    "http://localhost:8501","*"
 ]
 
 # Agregamos los corns para indicar que streamlit puede realizar solicitudes
@@ -27,8 +27,10 @@ app.add_middleware(
 # Cargamos el modelo en el servidor
 @app.on_event("startup")
 def start_event():
-    global model
-    model = load_model()
+    global model,model_data
+    model,model_data = load_model()
+    if model:
+        print("Modelo cargado con exito ✅")
     if not model:
         raise RuntimeError("❌ Error al cargar el modelo")
 
@@ -48,9 +50,11 @@ async def run_model(data: Datainput):
                                     data.baños, data.region,
                                     model)
     except Exception as e:
+        print(e)
         raise HTTPException(404,detail="Error al ejecutar el modelo")
     
     return JSONResponse(content={
         "Prediccion": f"$ {precio_estimado:,.2f} COP",
-        "Datos Recibidos": data.model_dump()
+        "Datos Recibidos": data.model_dump(),
+        "Details": model_data
     }, status_code=200)

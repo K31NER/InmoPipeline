@@ -1,9 +1,8 @@
-from typing import Annotated
 import joblib
 import numpy as np
 import pandas as pd
 
-MODEL_PATH = "Randomforest.pkl"
+MODEL_PATH = "model.pkl"
 
 region_cost = {
     "Caribe": 0.7,      
@@ -34,7 +33,13 @@ def load_model(model_path=MODEL_PATH):
         model = modelo_info['model']
         #feature_columns = modelo_info['feature_columns']
         #region_cost = modelo_info['region_cost']
-        return model
+        model_data = {
+            "R²": modelo_info["R2"],
+            "MSE": modelo_info["MSE"],
+            "Datos": modelo_info["Datos"],
+            "Nota": modelo_info["nota"]
+        }
+        return model ,model_data
     
     
     except Exception as e:
