@@ -11,6 +11,11 @@ st.set_page_config(
     layout="wide"
 )
 
+def add_icon(tipe:str) -> str:
+    """ Funcion para agregar iconos """
+    icon = f":material/{tipe}:"
+    return  icon
+
 # Definimos la url donde esta nuestro modelo
 URL_MODEL = "http://127.0.0.1:8000/model"
 
@@ -61,23 +66,23 @@ def predict_price(df):
     # Creamos el formulario
     with st.form("Formulario para predecir precio"):
         
-        metros_2 = st.number_input("Metros cuadrados",min_value=1,icon=":material/metro:",help="Indique el numero de metros cuadros que desea analizar")
+        metros_2 = st.number_input("Metros cuadrados",min_value=10.0,icon=add_icon("metro"),help="Indique el numero de metros cuadros que desea analizar",value=100.0,step=0.1)
         
-        habs = st.number_input("Numero de habitaciones",min_value=1,icon=":material/sensor_door:",help="Indica el numero de habitaciones que quiere")
+        habs = st.number_input("Numero de habitaciones",min_value=1,icon=add_icon("sensor_door"),help="Indica el numero de habitaciones que quiere")
         
-        baños = st.number_input("Numero de baños",min_value=1,icon=":material/bathroom:",help="Indica el numero de baños que quiere")
+        baños = st.number_input("Numero de baños",min_value=1,icon=add_icon("bathroom"),help="Indica el numero de baños que quiere")
         
         region = st.selectbox("Region",options=list_regiones,help="Indique en que region quiere analizar el inmueble")
         
         # Definimos el boton de enviar
-        enviar = st.form_submit_button("Enviar",icon=":material/send:",type="primary")
+        enviar = st.form_submit_button("Enviar",icon=add_icon("send"),type="primary")
         
         if enviar:
             # Recopilamos los datos
             data = {
                 "habs":int(habs),
                 "baños": int(baños),
-                "m2": int(metros_2),
+                "m2": float(metros_2),
                 "region": str(region)
             }
             
@@ -97,10 +102,10 @@ def predict_price(df):
                         detalles = json_response.get("Datos Recibidos")
                         
                         # Mostramos la respuesta
-                        st.success(f"Prediccion: {prediccion}",icon=":material/check_circle:")
+                        st.success(f"Prediccion: {prediccion}",icon=add_icon("check_circle"))
                         
                         # Mostramos los detalles
-                        with st.expander("Ver detalles",icon=":material/content_paste_search:"):
+                        with st.expander("Ver detalles",icon=add_icon("content_paste_search")):
                             st.json(detalles,expanded=True)
                         
                 except Exception as e:
@@ -115,7 +120,7 @@ with st.sidebar:
     
     # Filtramos por top interactivo
     top = int(st.number_input(label="Digite el numero de top a mostrar",
-                        value=5, min_value=3, max_value=10, step=1, format="%d", icon=":material/swap_vert:",help="Limita el numero de resultados mayores"))
+                        value=5, min_value=3, max_value=10, step=1, format="%d", icon=add_icon("swap_vert"),help="Limita el numero de resultados mayores"))
     
     # Filtrar por regiones
     lista_regiones = df["region"].sort_values().unique()
@@ -144,21 +149,21 @@ if filtro_terrenos:
         (df["region"] != "desconocido")
         ]
     
-    st.toast("Se eliminaron los datos con valores incompletos",icon=":material/delete:")
+    st.toast("Se eliminaron los datos con valores incompletos",icon=add_icon("delete"))
     
 if regiones:
     df = df[df["region"].isin(regiones)]
     regiones_texto = ", ".join(regiones)
-    st.toast(f"Regiones :green[{str(regiones_texto)}] selecionadas de manera correcta",icon=":material/map:")
+    st.toast(f"Regiones :green[{str(regiones_texto)}] selecionadas de manera correcta",icon=add_icon("map"))
 
 if ciudades:
     df = df[df["ciudades"].isin(ciudades)]
-    st.toast(f":green[{len(ciudades)}] Ciudades selecionadas con exito",icon=":material/location_city:")
+    st.toast(f":green[{len(ciudades)}] Ciudades selecionadas con exito",icon=add_icon("location_city"))
 
 # Reset index después de todos los filtros
 df = df.reset_index(drop=True)
 if df.empty:
-    st.badge("Sin resultados para los filtros seleccionados", icon=":material/warning:",color="red")
+    st.badge("Sin resultados para los filtros seleccionados", icon=add_icon("warning"),color="red")
     st.error("⚠️ No hay datos disponibles con los filtros seleccionados. Por favor, ajuste los filtros.")
     st.stop()  # Detiene la ejecución del resto del código
     
@@ -168,20 +173,20 @@ if df.empty:
 with st.sidebar:
     st.subheader("Funciones extra",divider="orange")
     
-    if st.button("Predecir",icon=":material/model_training:",use_container_width=True,help="Realiza predicciones del precio del inmueble en base a sus parametros"):
+    if st.button("Predecir",icon=add_icon("model_training"),use_container_width=True,help="Realiza predicciones del precio del inmueble en base a sus parametros"):
         predict_price(df)
-        st.toast(":green[Entro en modo de prediccion]",icon=":material/check:")
+        st.toast(":green[Entro en modo de prediccion]",icon=add_icon("check"))
         
-    if st.button("Resumen",icon=":material/description:",use_container_width=True,help="Obtenga un resumen estadictico general de los datos"):
+    if st.button("Resumen",icon=add_icon("description"),use_container_width=True,help="Obtenga un resumen estadictico general de los datos"):
         describe_data(df)
-        st.toast(":green[Resumen generado]",icon=":material/description:")
+        st.toast(":green[Resumen generado]",icon=add_icon("description"))
         
     st.subheader("Fuentes de datos",divider="orange")
     
     # Fuente de los datos con enlace real
-    st.link_button("Datos - FincaRaiz","https://www.fincaraiz.com.co",icon=":material/dataset_linked:",use_container_width=True,type="primary")
+    st.link_button("Datos - FincaRaiz","https://www.fincaraiz.com.co",icon=add_icon("dataset_linked"),use_container_width=True,type="primary")
     
-    st.link_button("API Colombia - Regiones","https://api-colombia.com",use_container_width=True,icon=":material/api:",type="primary")
+    st.link_button("API Colombia - Regiones","https://api-colombia.com",use_container_width=True,icon=add_icon("api"),type="primary")
     
     
 # ___________________________ badge de estado de filtros ________________________
@@ -189,29 +194,29 @@ with st.sidebar:
 c1,c2,c3,c4 = st.columns(4)
 with c1: 
     if regiones:
-        st.badge(f"Regiones filtradas: {len(regiones)}", icon=":material/map:", color="orange")
+        st.badge(f"Regiones filtradas: {len(regiones)}", icon=add_icon("map"), color="orange")
     else:
-        st.badge(f"Regiones totales: {len(df['region'].unique())}", icon=":material/map:", color="green")
+        st.badge(f"Regiones totales: {len(df['region'].unique())}", icon=add_icon("map"), color="green")
         
 with c2:
     if ciudades:
-        st.badge(f"Ciudades filtradas: {len(ciudades)}", icon=":material/location_city:", color="orange") 
+        st.badge(f"Ciudades filtradas: {len(ciudades)}", icon=add_icon("location_city"), color="orange") 
     else:
-        st.badge(f"Ciudades: {len(df['ciudades'].unique())}", icon=":material/location_city:", color="green") 
+        st.badge(f"Ciudades: {len(df['ciudades'].unique())}", icon=add_icon("location_city"), color="green") 
 with c3:
     if filtro_terrenos:
-        st.badge(f"Se excluyeron valores", icon=":material/disabled_visible:", color="orange") 
+        st.badge(f"Se excluyeron valores", icon=add_icon("disabled_visible"), color="orange") 
     else:
-        st.badge(f"Todos los valores disponibles", icon=":material/in_home_mode:", color="green") 
+        st.badge(f"Todos los valores disponibles", icon=add_icon("in_home_mode"), color="green") 
 with c4:
     if regiones and ciudades:
-        st.badge("Análisis enfocado por región y ciudad", icon=":material/search_insights:", color="orange")
+        st.badge("Análisis enfocado por región y ciudad", icon=add_icon("search_insights"), color="orange")
     elif regiones:
-        st.badge(f"Análisis enfocado por región: {len(regiones)}", icon=":material/search_insights:", color="orange")
+        st.badge(f"Análisis enfocado por región: {len(regiones)}", icon=add_icon("search_insights"), color="orange")
     elif ciudades:
-        st.badge(f"Análisis enfocado por ciudad: {len(ciudades)}", icon=":material/search_insights:", color="orange")
+        st.badge(f"Análisis enfocado por ciudad: {len(ciudades)}", icon=add_icon("search_insights"), color="orange")
     else:
-        st.badge("Análisis general - Todo el país", icon=":material/search_insights:", color="green")
+        st.badge("Análisis general - Todo el país", icon=add_icon("search_insights"), color="green")
 
 # _____________________ Manejo de datos __________________________
 # Fila de la propiedad más cara y mas barata

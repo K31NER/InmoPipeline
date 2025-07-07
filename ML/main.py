@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from schema import Datainput
 from fastapi.responses import JSONResponse
+from utils import get_predict,load_model
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -9,6 +10,7 @@ app = FastAPI(
     summary="Expone el modelo de machine learning para predicción de precios inmobiliarios",
 )
 
+# Definimos las urls que tendran acceso a la api
 origins = [
     "http://localhost:8501"
 ]
@@ -22,23 +24,33 @@ app.add_middleware(
     allow_headers = ["*"]
 )
 
+# Cargamos el modelo en el servidor
+@app.on_event("startup")
+def start_event():
+    global model
+    model = load_model()
+    if not model:
+        raise RuntimeError("❌ Error al cargar el modelo")
+
+# Endpoint de incio
 @app.get("/")
 async def index():
     return {"Message": "✅ Servidor iniciado con éxito - InmoPipeline API"}
     
-    
+# Endpoint para cargar el modelo
 @app.post("/model")
 async def run_model(data: Datainput):
     """
     Endpoint que recibe los datos de entrada y devuelve la predicción de precio.
     """
+    try:
+        precio_estimado = get_predict(data.m2, data.habs,
+                                    data.baños, data.region,
+                                    model)
+    except Exception as e:
+        raise HTTPException(404,detail="Error al ejecutar el modelo")
     
-    # 🔮 Aquí en el futuro deberías cargar y usar tu modelo real:
-    # precio_estimado = modelo.predict([data.habs, data.baños, data.m2, data.region])
-    
-    # Mientras tanto, respuesta de ejemplo:
-    precio_estimado = "1.000M COP (estimado ficticio)"
     return JSONResponse(content={
-        "Prediccion": precio_estimado,
+        "Prediccion": f"$ {precio_estimado:,.2f} COP",
         "Datos Recibidos": data.model_dump()
     }, status_code=200)
