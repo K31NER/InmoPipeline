@@ -1,5 +1,14 @@
 import httpx
+import pandas as pd
 import streamlit as st
+from pathlib import Path
+
+@st.cache_data()
+def get_data():
+    current_dir = Path(__file__).resolve().parent  # EDA/
+    data_path = current_dir.parent / 'Data' / 'propiedades.csv'
+    df = pd.read_csv(data_path)
+    return df
 
 # Definimos la url donde esta nuestro modelo
 URL_MODEL = "http://127.0.0.1:8000/model"
