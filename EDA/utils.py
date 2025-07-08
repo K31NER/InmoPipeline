@@ -3,6 +3,10 @@ import pandas as pd
 import streamlit as st
 from pathlib import Path
 
+# Definimos la url donde esta nuestro modelo
+#URL_MODEL = "http://127.0.0.1:8000/model" # desarrollo
+URL_MODEL = "https://inmopipeline-production.up.railway.app/model"
+
 @st.cache_data()
 def get_data():
     # Directorio actual del script (EDA/)
@@ -28,9 +32,6 @@ def get_data():
     df = pd.read_csv(data_path)
 
     return df, logo_path
-
-# Definimos la url donde esta nuestro modelo
-URL_MODEL = "http://127.0.0.1:8000/model"
 
 @st.dialog("Resumen estadistico",width="large")
 def describe_data(df):
