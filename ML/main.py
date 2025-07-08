@@ -1,5 +1,5 @@
-from schema import Datainput
-from utils import get_predict,load_model
+from ML.schema import Datainput
+from ML.utils import get_predict,load_model
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
