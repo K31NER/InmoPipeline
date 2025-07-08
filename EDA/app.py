@@ -4,9 +4,11 @@ from utils import *
 import streamlit as st 
 import plotly.express as px
 
+df,logo = get_data()
+
 # Configuramos el dashboard
 st.set_page_config(
-    page_icon="../img/logo.png",
+    page_icon=str(logo),
     page_title="InmoPipeline",
     layout="wide"
 )
@@ -23,8 +25,7 @@ URL_MODEL = "http://127.0.0.1:8000/model"
 st.header("🏡 FincaRaiz - Exploración del Mercado de Bienes Raíces en Colombia",width="content")
 st.caption("Análisis exploratorio de precios y ubicación de propiedades en Colombia")
 
-# Cargamos el dataframe
-df = get_data()
+# Ordenamos el df
 df_ordenado = ["ciudades","region","precios","habitaciones","baños","metros_cuadrados","enlaces"]
 
 # Personalizamos el estilo de los datos que se mostraran
@@ -48,7 +49,7 @@ df_column_style = {
 # Definimos el primer sidebar para filtrar
 with st.sidebar:
     st.logo("https://cdn-icons-png.flaticon.com/128/14648/14648421.png",size="large")
-    st.image("../img/logo.png")
+    st.image(str(logo))
     st.subheader("Configuraciones",divider="orange")
     
     # Filtramos por top interactivo
