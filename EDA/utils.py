@@ -5,15 +5,29 @@ from pathlib import Path
 
 @st.cache_data()
 def get_data():
-    current_dir = Path(__file__).resolve().parent  # EDA/
+    # Directorio actual del script (EDA/)
+    current_dir = Path(__file__).resolve().parent
+
+    # Ruta al archivo CSV
     data_path = current_dir.parent / 'Data' / 'propiedades.csv'
+
+    # Ruta al logo
+    logo_path = current_dir.parent / 'img' / 'logo.png'
+
+    # Validación del CSV
     if not data_path.exists():
-        st.error("❌ Archivo no encontrado en: " + str(data_path))
+        st.error(f"❌ Archivo CSV no encontrado en: {data_path}")
         st.stop()
 
+    # Validación del logo
+    if not logo_path.exists():
+        st.warning(f"⚠️ Logo no encontrado en: {logo_path}")
+        logo_path = None  # para evitar errores más adelante
+
+    # Carga de datos
     df = pd.read_csv(data_path)
-    return df
-    return df
+
+    return df, logo_path
 
 # Definimos la url donde esta nuestro modelo
 URL_MODEL = "http://127.0.0.1:8000/model"
