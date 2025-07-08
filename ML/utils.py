@@ -2,7 +2,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-MODEL_PATH = "model.pkl"
+MODEL_PATH = "ML/model.pkl"
 
 region_cost = {
     "Caribe": 0.7,      
