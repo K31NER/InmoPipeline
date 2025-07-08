@@ -24,11 +24,6 @@ st.header("🏡 FincaRaiz - Exploración del Mercado de Bienes Raíces en Colomb
 st.caption("Análisis exploratorio de precios y ubicación de propiedades en Colombia")
 
 # Cargamos el dataframe
-@st.cache_data() # Guardamos en cache los datos
-def get_data():
-    df = pd.read_csv("../Data/propiedades.csv")
-    return df
-
 df = get_data()
 df_ordenado = ["ciudades","region","precios","habitaciones","baños","metros_cuadrados","enlaces"]
 
