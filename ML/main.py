@@ -1,7 +1,8 @@
 from ML.schema import Datainput
-from ML.utils import get_predict,load_model
+from ML.router import inmuebles
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, HTTPException
+from ML.utils import get_predict,load_model
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
@@ -59,3 +60,7 @@ async def run_model(data: Datainput):
         "Datos Recibidos": data.model_dump(),
         "Details": model_data
     }, status_code=200)
+
+
+# Incluimos los routers
+app.include_router(inmuebles.router)
