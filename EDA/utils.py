@@ -7,7 +7,12 @@ from pathlib import Path
 def get_data():
     current_dir = Path(__file__).resolve().parent  # EDA/
     data_path = current_dir.parent / 'Data' / 'propiedades.csv'
+    if not data_path.exists():
+        st.error("❌ Archivo no encontrado en: " + str(data_path))
+        st.stop()
+
     df = pd.read_csv(data_path)
+    return df
     return df
 
 # Definimos la url donde esta nuestro modelo
