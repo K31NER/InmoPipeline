@@ -391,7 +391,7 @@ El modelo ha sido rigurosamente validado:
 
 ---
 
-## 👥 Contribuciones
+## ⭐ Objetivo
 
 Este proyecto fue desarrollado como parte de un pipeline completo de ingeniería y ciencia de datos, integrando:
 
