@@ -27,8 +27,13 @@ def normalizar_texto(texto: str) -> str:
 
 @router.get("/propiedades_region/{region}",summary="Retorna todos los datos de los inmuebles en esa region")
 def get_propiedades_by_region(db:connection,
-                            region:str,habs:int = None,
-                            limite:int = None):
+                            region:str,
+                            habs:int = None,
+                            baños: int = None,
+                            precio:int = None,
+                            metros:int = None,
+                            limite:int = None
+                            ):
     
     # Creamos una lista y un diccionario para menajar los parametros
     filtros = []
@@ -51,6 +56,21 @@ def get_propiedades_by_region(db:connection,
     if habs:
         filtros.append("CAST(habitaciones AS INTEGER) = :habs")
         params["habs"] = habs
+    
+    # Validamos si hay baños
+    if baños:
+        filtros.append("CAST(baños AS INTEGER) = :baños")
+        params["baños"] = baños
+    
+    # Validamos si hay precios
+    if precio:
+        filtros.append("CAST(precios AS INTEGER) >= :precio")
+        params["precio"] = precio
+        
+    # Validamos si hay metros
+    if metros:
+        filtros.append("CAST(metros_cuadrados AS INTEGER) >= :metros")
+        params["metros"] = metros
         
     # Definimos el filtro where
     where_clause = " WHERE " + " AND ".join(filtros) if filtros else ""
@@ -77,10 +97,16 @@ def get_propiedades_by_region(db:connection,
         "data": datos,
     },status_code=200)
 
+
 @router.get("/propiedades_ciudad/{ciudad}",
             summary="Retorna todos los datos de los inmubeles de esa ciudad")
-def get_propiedades_by_ciudad(db:connection,ciudad:str,
-                            habs:int = None, limite:int = None):
+def get_propiedades_by_ciudad(db:connection,
+                            ciudad:str,
+                            habs:int = None,
+                            baños: int = None,
+                            precio: int = None,
+                            metros: int = None, 
+                            limite:int = None):
     
     # Creamos una lista y un diccionario para menajar los parametros
     
@@ -93,13 +119,28 @@ def get_propiedades_by_ciudad(db:connection,ciudad:str,
                         detail={"details":f"Ciudades no encontradas"})
         
     # Agregamos la condicion principal
-    filtros.append("ciudades = :ciudad")
+    filtros.append("ciudad_normalizada = :ciudad")
     params["ciudad"] = normalizar_texto(ciudad)
     
     # Validamos las habitaciones
     if habs:
         filtros.append("CAST(habitaciones AS INTEGER) = :habs")
         params["habs"] = habs
+    
+    # Validamos si esta el campo baños
+    if baños:
+        filtros.append("CAST(baños AS INTEGER) = :baños")
+        params["baños"] = baños
+        
+    # Validamos si esta el campo precio
+    if precio:
+        filtros.append("CAST(precios AS INTEGER) >= :precio")
+        params["precio"] = precio
+    
+    # Validamos si esta el campo metros
+    if metros:
+        filtros.append("CAST(metros_cuadrados AS INTEGER) >= :metro")
+        params["metro"] = metros
     
     # Creamos las consultas
     where_clause = " WHERE " + " AND ".join(filtros) if filtros else ""

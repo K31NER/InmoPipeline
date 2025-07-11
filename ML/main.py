@@ -1,5 +1,6 @@
 from ML.schema import Datainput
 from ML.router import inmuebles
+from fastapi_mcp import FastApiMCP
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, HTTPException
 from ML.utils import get_predict,load_model
@@ -64,3 +65,9 @@ async def run_model(data: Datainput):
 
 # Incluimos los routers
 app.include_router(inmuebles.router)
+
+# definimos el server mcp
+mcp = FastApiMCP(fastapi=app,
+                describe_full_response_schema="Servidor MCP para realizar consultas sobre inmubeles en colombia")
+
+mcp.mount()
