@@ -48,7 +48,7 @@
 
 ### 📊 **Análisis de Datos**
 - **Análisis Exploratorio**: Identificación de patrones y tendencias del mercado
-- **Dashboards Interactivos**: Visualizaciones dinámicas con Power BI y Streamlit
+- **Dashboards Interactivos**: Visualizaciones dinámicas con Streamlit
 - **KPIs del Mercado**: Métricas clave del sector inmobiliario
 
 ### 🤖 **Ciencia de Datos**
@@ -85,9 +85,9 @@ graph TB
     end
     
     subgraph "📊 Analytics Layer"
-        I[Power BI Analysis]
-        J[Streamlit Dashboard]
-        K[Statistical Analysis]
+        I[Streamlit EDA]
+        J[Statistical Analysis]
+        K[Interactive Dashboard]
     end
     
     subgraph "🤖 ML Pipeline"
@@ -121,7 +121,7 @@ graph TB
     O --> P
     P --> Q
     P --> R
-    J --> S
+    I --> S
     S --> Q
 ```
 
@@ -152,8 +152,8 @@ graph LR
 #### **Fase 3: 📊 Analytics & Visualization**
 ```mermaid
 graph LR
-    A[💾 Clean Data] --> B[📊 Power BI Analysis]
-    A --> C[🎛️ Streamlit Dashboard]
+    A[💾 Clean Data] --> B[🎛️ Streamlit EDA]
+    A --> C[📈 Statistical Analysis]
     B --> D[📈 Business Insights]
     C --> D
 ```
@@ -278,8 +278,8 @@ RandomForestRegressor(
 - **Consistencia**: ✅ Error concordante con R² (0.30 faltante ≈ 19% error)
 
 <div align="center">
-<img src="img/validacion/prediccion.png" alt="Comparación Precios Reales vs Predicciones" width="700"/>
-<p><em>Comparación entre precios reales y predicciones del modelo en datos de validación</em></p>
+<img src="img/validacion/Real_vs_prediccion.png" alt="Comparación Precios Reales vs Predicciones" width="700"/>
+<p><em>Análisis comparativo entre precios reales del mercado y predicciones del modelo</em></p>
 </div>
 
 ---
@@ -336,7 +336,6 @@ graph LR
 - [ ] � **v4.0**: Containerización con Docker
 - [ ] 📋 **v4.1**: CI/CD Pipeline automatizado
 - [ ] 🔄 **v4.2**: Reentrenamiento automático del modelo
-- [ ] 📱 **v5.0**: Aplicación móvil nativa
 
 ---
 
@@ -377,11 +376,6 @@ El modelo ha sido rigurosamente validado:
 - **Error coherente**: 19.44% externo vs 30% esperado del R² faltante
 - **Distribución de errores**: Normal, sin sesgos sistemáticos
 
-<div align="center">
-<img src="img/validacion/Precio real.png" alt="Análisis de Precios Reales vs Predichos" width="700"/>
-<p><em>Análisis detallado de la precisión del modelo en diferentes rangos de precios</em></p>
-</div>
-
 ---
 
 ## 📸 Galería de Resultados
@@ -393,14 +387,7 @@ El modelo ha sido rigurosamente validado:
 | Métrica de Validación | Análisis de Precisión |
 |:---------------------:|:---------------------:|
 | <img src="img/validacion/porcentaje_error.png" alt="Distribución de Errores" width="400"/> | <img src="img/validacion/Precio real.png" alt="Análisis de Precios" width="400"/> |
-| *Distribución del error absoluto en validación externa* | *Precisión del modelo por rangos de precios* |
-
-### 🤖 **Automatización Inteligente**
-
-<img src="img/validacion/prediccion.png" alt="Predicciones vs Realidad" width="600"/>
-<p><em>Comparación directa entre predicciones del modelo y precios reales del mercado</em></p>
-
-</div>
+| *Distribución del error absoluto en validación externa* | *Precio real del inmueble* |
 
 ---
 
@@ -412,12 +399,6 @@ Este proyecto fue desarrollado como parte de un pipeline completo de ingeniería
 - **Machine Learning**: Modelo predictivo con validación externa rigurosa  
 - **MLOps**: Despliegue automatizado y monitoreo en producción
 - **Automation**: Workflows inteligentes con n8n y MCP
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
 ---
 
