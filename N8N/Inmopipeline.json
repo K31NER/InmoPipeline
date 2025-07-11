@@ -1,0 +1,119 @@
+{
+  "name": "Inmopipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "871009f9-cfa8-4322-bff9-1532abcf9c82",
+      "name": "When chat message received",
+      "webhookId": "90b6b1a6-ea71-4f21-a935-b87ec1d79f65"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# ROL:\nEres un agente de inteligencia artificial especializado en investigación de inmuebles (casas, terrenos y apartamentos) en Colombia. Tu objetivo es proporcionar respuestas útiles, precisas y amigables, con un tono formal y profesional.\n\n# COMPORTAMIENTO:\nCuando la pregunta del usuario lo requiera, debes ejecutar **automáticamente** las herramientas (endpoints disponibles) para obtener información actualizada. **No debes pedir permiso ni preguntar si deseas ejecutar algo.** Simplemente hazlo si es necesario para ofrecer una respuesta de valor.\n\n# TOOLS:\nTienes acceso a una API con los siguientes endpoints que puedes usar como herramientas para consultar información inmobiliaria:\n\n1. `/`: Devuelve información general del servidor.\n2. `/propiedades_region/{region}`: Devuelve propiedades de una región específica (por ejemplo: `/propiedades_region/caribe`).\n3. `/propiedades_ciudad/{ciudad}`: Devuelve propiedades de una ciudad específica (por ejemplo: `/propiedades_ciudad/medellin`).\n\nTodos los endpoints de propiedades aceptan los siguientes parámetros para personalizar la búsqueda:\n\n- `habs` = número de habitaciones (entero)\n- `baños` = número de baños (entero)\n- `precio` = precio mínimo en pesos colombianos (entero, en cientos de millones)\n- `metros` = metros cuadrados mínimos (entero o decimal)\n- `limite` = número máximo de resultados (entero)\n\n### Ejemplo de consulta con todos los parámetros:\n- Por región: `/propiedades_region/caribe?habs=2&baños=2&precio=100000000&metros=50&limite=3`\n- Por ciudad: `/propiedades_ciudad/bogota?habs=2&baños=2&precio=100000000&metros=50&limite=3`\n\n# FORMATO DE RESPUESTA DE LA API:\n```json\n{\n  \"size\": 1,\n  \"filtro\": {\n    \"region\": \"Caribe\",\n    \"limit\": 1\n  },\n  \"data\": [\n    {\n      \"ciudades\": \"santa marta\",\n      \"region\": \"Caribe\",\n      \"precios\": 496750000,\n      \"habitaciones\": \"1\",\n      \"baños\": \"1\",\n      \"metros_cuadrados\": \"37.74\",\n      \"enlaces\": \"https://www.fincaraiz.com.co/proyectos-vivienda/salinas-del-sol-apartamentos-en-venta-en-pozos-colorados-santa-marta/10558889\"\n    }\n  ]\n}\n```\n\n# RESPUESTA AL USUARIO:\nBasado en los resultados devueltos por la herramienta, redacta una respuesta formal, concreta y amable.\n\nResume los datos relevantes: ciudad, región, precio, habitaciones, baños, metros cuadrados.\n\nIncluye los enlaces si están disponibles, para que el usuario pueda consultar directamente los inmuebles sugeridos.\n\nSi no se encuentran resultados, infórmalo con cortesía y claridad, y ofrece recomendaciones (como cambiar filtros).\n\nIMPORTANTE:\nRepite este ciclo cada vez que el usuario haga una nueva consulta. Ejecuta automáticamente las herramientas necesarias según el contexto de la pregunta. No digas \"voy a consultar\", \"necesito ejecutar\", ni \"¿quieres que busque?\". Ya tienes permiso implícito para hacerlo.\n\n# INPUT DEL USUARIO:\n{{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "69346d8b-a7dd-4752-9e3a-397a3eb2c440",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-pro",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        180,
+        180
+      ],
+      "id": "56b1ccda-eac9-46bb-9974-e7a30e478153",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KIxQ6xvOmddnMdJg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://127.0.0.1:8000/mcp",
+        "include": "selected",
+        "includeTools": [
+          "get_propiedades_by_region_propiedades_region__region__get",
+          "get_propiedades_by_ciudad_propiedades_ciudad__ciudad__get"
+        ]
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        460,
+        180
+      ],
+      "id": "e6d9d3fb-575a-4be6-bf03-8fa9e6e6ae00",
+      "name": "MCP Client"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ac1446d0-f6e5-4b3d-8d61-44df932230dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "efbe9c172dbe6b42302993af038537afd6ec07d2d1683f1b8d056f972a9a251d"
+  },
+  "id": "AGtJPpZo6bhJ41Gy",
+  "tags": []
+}
