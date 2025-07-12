@@ -1,11 +1,19 @@
+import logging
 from ML.schema import Datainput
 from ML.router import inmuebles
 from fastapi_mcp import FastApiMCP
+from ML.logger_config import logger_startup
 from fastapi.responses import JSONResponse
 from fastapi import FastAPI, HTTPException
-from ML.utils import get_predict,load_model
 from fastapi.middleware.cors import CORSMiddleware
+from ML.utils import get_predict,load_model,get_distinct_city
 
+# Connfiguramos el logger
+logger_startup()
+
+logger = logging.getLogger(__name__)
+
+# Definimos el objeto de fastapi
 app = FastAPI(
     title="API InmoPipeline",
     version="0.1",
@@ -30,11 +38,22 @@ app.add_middleware(
 @app.on_event("startup")
 def start_event():
     global model,model_data
+    
+    # Cargamos el modelo y su informacion
     model,model_data = load_model()
-    if model:
-        print("Modelo cargado con exito ✅")
+    
+    #cargamos las ciudades distintas
+    ciudades = get_distinct_city()
+    app.state.ciudades = ciudades
+    
+    # validamos que se carge
     if not model:
+        logger.error("No se logro cargar el modelo")
         raise RuntimeError("❌ Error al cargar el modelo")
+    
+    print("Modelo cargado con exito ✅")
+    logger.info("Modelo cargado con exito")
+        
 
 # Endpoint de incio
 @app.get("/")
@@ -53,9 +72,10 @@ async def run_model(data: Datainput):
                                     data.baños, data.region,
                                     model)
     except Exception as e:
-        print(e)
+        logger.exception("Error al realizar prediccion")
         raise HTTPException(404,detail="Error al ejecutar el modelo")
     
+    logger.info("Prediccion realizada con exito")
     return JSONResponse(content={
         "Prediccion": f"$ {precio_estimado:,.2f} COP",
         "Datos Recibidos": data.model_dump(),
@@ -70,4 +90,5 @@ app.include_router(inmuebles.router)
 mcp = FastApiMCP(fastapi=app,
                 describe_full_response_schema="Servidor MCP para realizar consultas sobre inmubeles en colombia")
 
+# Montamos el servidor
 mcp.mount()

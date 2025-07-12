@@ -2,7 +2,7 @@ import pandas as pd
 from utils import load_model,get_predict
 
 # Ruta de los datos para validar
-CSV_VALIDATE_PATH = "../Data/validate_data.csv"
+CSV_VALIDATE_PATH = "Data/validate_data.csv"
 
 # Definimos la funcion para calcular el error absoluto
 def validate_error(real_price:float,predict_price:float) -> float:
