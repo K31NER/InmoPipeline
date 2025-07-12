@@ -1,15 +1,30 @@
 import joblib
+import duckdb
+import unicodedata
 import numpy as np
 import pandas as pd
 
+DB_PATH = "Data/inmuebles.db"
 MODEL_PATH = "ML/model.pkl"
 
+# Diccionario de costes
 region_cost = {
     "Caribe": 0.7,      
     "Amazonía": 0.6,    
     "Pacífico": 0.8,     
     "Orinoquía": 0.75,   
     "Andina": 1.0,       
+}
+
+# Diccionario para mapear entrada normalizada a nombre correcto
+regiones_map = {
+    "caribe": "Caribe",
+    "amazonia": "Amazonia",
+    "pacifico": "Pacífico",
+    "orinoquia": "Orinoquía",
+    "andina": "Andina",
+    "insular": "Insular",
+    "desconocido": "desconocido"
 }
 
 def load_model(model_path=MODEL_PATH):
@@ -95,11 +110,39 @@ def get_predict(metros_cuadrados:int, habitaciones:int
     
     return precio_real
 
+def normalizar_texto(texto: str) -> str:
+    """ Elimina las tildes y pone en minisculas
+    
+    Parametros:
+    - texto: recibe un str para normalizar
+    
+    Return:
+    - texto_normalizado: Devuelve el texto sin tildes y en minusculas
+    """
+    return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().lower()
+
+def get_distinct_city(db_path:str = DB_PATH) -> pd.DataFrame:
+    """ Obtiene todas las ciudades unicas de la base de datos 
+    
+    Parametros:
+    - db_path : ruta de la base de datos. = Definida por defecto
+    
+    Return
+    - data.values: devuelce un array numpy de las ciudades unicas.
+    """
+    db = duckdb.connect(db_path)
+    data = db.execute("SELECT DISTINCT(ciudad_normalizada) FROM propiedades").fetch_df()
+    return data.values
 
 if __name__ == "__main__":
+    df = get_distinct_city(DB_PATH)
+    print(df)
+    """ 
     model = load_model(MODEL_PATH)
     if model is not None:
         nuevo_precio = get_predict(150, 2, 1, "Caribe", model)
         print(f"$ {nuevo_precio:,.2f} COP")
     else:
         print("No se pudo cargar el modelo.")
+    """
+
