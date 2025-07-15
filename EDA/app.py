@@ -287,4 +287,3 @@ with c2:
                 title="Distribucion de precios de las propiedades",color_discrete_sequence=["#F54B1C"])
     st.plotly_chart(hist_fig)
     
-

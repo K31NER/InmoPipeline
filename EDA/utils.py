@@ -15,7 +15,7 @@ def get_data():
     current_dir = Path(__file__).resolve().parent
 
     # Ruta al archivo CSV
-    data_path = current_dir.parent / 'Data' / 'propiedades.csv'
+    data_path = current_dir.parent / 'Data' / 'inmuebles.csv'
 
     # Ruta al logo
     logo_path = current_dir.parent / 'img' / 'logo.png'
