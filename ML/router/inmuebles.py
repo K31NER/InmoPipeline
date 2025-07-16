@@ -131,14 +131,15 @@ def get_propiedades_by_ciudad(db:connection,
     ciudades = request.app.state.ciudades 
     
     # Validamos la ciudad
-    if ciudad not in ciudades:
+    ciudad_normalizada = ciudad.strip().lower()
+    if ciudad_normalizada not in ciudades:
         logger.warning(f"Ciudad: {ciudad} no encontrada")
         raise HTTPException(status_code=404,
                         detail={"details":"Ciudad no encontradas"})
         
     # Agregamos la condicion principal
     filtros.append("ciudad_normalizada = :ciudad")
-    params["ciudad"] = normalizar_texto(ciudad)
+    params["ciudad"] = normalizar_texto(ciudad_normalizada)
     
     # Validamos las habitaciones
     if habs:

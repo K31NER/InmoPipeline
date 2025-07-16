@@ -4,9 +4,7 @@ import streamlit as st
 from pathlib import Path
 
 # Definimos las url donde esta nuestro modelo
-
 #URL_MODEL = "http://127.0.0.1:8000/model" # desarrollo
-#URL_MODEL = "https://inmopipeline-production.up.railway.app/model"
 URL_MODEL = "https://inmopipeline.onrender.com/model"
 
 @st.cache_data()
@@ -48,7 +46,7 @@ def add_icon(tipe:str) -> str:
     return  icon
 
 @st.dialog("Predecir precio",width="large")
-def predict_price(df,url:str = URL_MODEL):
+def predict_price(url:str = URL_MODEL):
     """ Realiza una solcitud post a la API que tiene el modelo y devuelve la respuesta"""
     # Definimos la lista de regiones que espera la API
     list_regiones = ["Caribe","Amazonia","Pacífico","Orinoquía","Andina","Insular"]
