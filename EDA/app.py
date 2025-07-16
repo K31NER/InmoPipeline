@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from utils import *
 import streamlit as st 
 import plotly.express as px
@@ -12,11 +11,6 @@ st.set_page_config(
     page_title="InmoPipeline",
     layout="wide"
 )
-
-def add_icon(tipe:str) -> str:
-    """ Funcion para agregar iconos """
-    icon = f":material/{tipe}:"
-    return  icon
 
 # Definimos la url donde esta nuestro modelo
 URL_MODEL = "http://127.0.0.1:8000/model"
@@ -113,7 +107,7 @@ with st.sidebar:
     st.subheader("Funciones extra",divider="orange")
     
     if st.button("Predecir",icon=add_icon("model_training"),use_container_width=True,help="Realiza predicciones del precio del inmueble en base a sus parametros"):
-        predict_price(df)
+        predict_price()
         st.toast(":green[Entro en modo de prediccion]",icon=add_icon("check"))
         
     if st.button("Resumen",icon=add_icon("description"),use_container_width=True,help="Obtenga un resumen estadictico general de los datos"):
