@@ -131,11 +131,11 @@ def get_propiedades_by_ciudad(db:connection,
     ciudades = request.app.state.ciudades 
     
     # Validamos la ciudad
-    ciudad_normalizada = ciudad.strip().lower()
+    ciudad_normalizada = normalizar_texto(ciudad).strip().lower()
     if ciudad_normalizada not in ciudades:
         logger.warning(f"Ciudad: {ciudad} no encontrada")
         raise HTTPException(status_code=404,
-                        detail={"details":"Ciudad no encontradas"})
+                        detail={"details":f"Ciudad: {ciudad_normalizada} no encontradas"})
         
     # Agregamos la condicion principal
     filtros.append("ciudad_normalizada = :ciudad")
